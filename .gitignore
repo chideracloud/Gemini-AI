@@ -1,0 +1,15 @@
+# Ignore Python virtual environment folder
+venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignore logs and temporary files
+*.log
+
+# Ignore OS and editor files
+.DS_Store
+.vscode/
+.idea/
