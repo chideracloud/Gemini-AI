@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+ <head>
+   <title>YouTube Summarizer</title>
+   <style>
+     body {
+       font-family: sans-serif;
+       display: flex;
+       justify-content: center;
+       align-items: center;
+       min-height: 100vh;
+       background-color: #f4f4f4;
+       margin: 0;
+       padding: 20px;
+     }
+     .container {
+       background-color: white;
+       padding: 30px;
+       border-radius: 8px;
+       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+       text-align: center;
+       width: 100%;
+       max-width: 800px;
+     }
+     h2 {
+       text-align: center;
+       margin-bottom: 20px;
+     }
+     input[type="text"], textarea, select {
+       width: 100%;
+       padding: 10px;
+       margin-bottom: 15px;
+       border: 1px solid #ccc;
+       border-radius: 4px;
+       box-sizing: border-box;
+     }
+     button {
+       background-color: #4CAF50;
+       color: white;
+       padding: 12px 20px;
+       border: none;
+       border-radius: 4px;
+       cursor: pointer;
+     }
+     #loading {
+       display: none;
+       margin-top: 20px;
+     }
+     #summary-container {
+       margin-top: 30px;
+       display: none;
+       text-align: left;
+     }
+     #summary-text {
+       background-color: #f9f9f9;
+       padding: 15px;
+       border-radius: 4px;
+       border-left: 4px solid #4CAF50;
+       white-space: pre-wrap;
+     }
+     .error {
+       color: #f44336;
+       margin-top: 15px;
+     }
+   </style>
+ </head>
+ <body>
+   <div class="container">
+     <h2>YouTube Summarizer</h2>
+     <form id="summarize-form">
+       <input type="text" name="youtube_link" id="youtube_link" placeholder="Enter YouTube Link" required>
+       <select name="model" id="model">
+         <option value="gemini-2.0-flash-001">Gemini 2.0 Flash</option>
+       </select>
+       <textarea name="additional_prompt" id="additional_prompt" placeholder="Write your additional prompt here. For example: 'explain to me like I am five years old'"></textarea>
+       <button type="submit">Summarize</button>
+     </form>
+     
+     <div id="loading">
+       <p>Generating summary... This may take a moment.</p>
+     </div>
+     
+     <div id="error-message" class="error"></div>
+     
+     <div id="summary-container">
+       <h3>Summary</h3>
+       <div id="summary-text"></div>
+     </div>
+   </div>
+
+   <script>
+     document.getElementById('summarize-form').addEventListener('submit', function(e) {
+       e.preventDefault();
+       
+       // Show loading message
+       document.getElementById('loading').style.display = 'block';
+       document.getElementById('summary-container').style.display = 'none';
+       document.getElementById('error-message').textContent = '';
+       
+       // Get form data
+       const youtubeLink = document.getElementById('youtube_link').value;
+       const model = document.getElementById('model').value;
+       const additionalPrompt = document.getElementById('additional_prompt').value;
+       
+       // Create form data object
+       const formData = new FormData();
+       formData.append('youtube_link', youtubeLink);
+       formData.append('model', model);
+       formData.append('additional_prompt', additionalPrompt);
+       
+       // Send AJAX request
+       fetch('/summarize', {
+         method: 'POST',
+         body: formData
+       })
+       .then(response => response.json())
+       .then(data => {
+         // Hide loading message
+         document.getElementById('loading').style.display = 'none';
+         
+         if (data.success) {
+           // Show summary
+           document.getElementById('summary-container').style.display = 'block';
+           document.getElementById('summary-text').textContent = data.summary;
+         } else {
+           // Show error message
+           document.getElementById('error-message').textContent = data.error || 'An error occurred while generating the summary.';
+         }
+       })
+       .catch(error => {
+         // Hide loading message and show error
+         document.getElementById('loading').style.display = 'none';
+         document.getElementById('error-message').textContent = 'An error occurred. Please try again.';
+         console.error('Error:', error);
+       });
+     });
+   </script>
+ </body>
+</html>
